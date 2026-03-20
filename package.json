@@ -1,0 +1,51 @@
+{
+  "name": "rutter-ts",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for the Rutter API",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./generated": {
+      "import": {
+        "types": "./dist/generated.d.ts",
+        "default": "./dist/generated.js"
+      },
+      "require": {
+        "types": "./dist/generated.d.cts",
+        "default": "./dist/generated.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "generate": "bun openapi-ts -c openapi-ts.config.ts && bun scripts/postgenerate.ts"
+  },
+  "peerDependencies": {
+    "zod": ">=3.23.0 || >=4.0.0"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "^0.94.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5",
+    "vitest": "^4.0.15",
+    "zod": "^4.2.1"
+  },
+  "license": "MIT"
+}
