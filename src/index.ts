@@ -1,7 +1,5 @@
 export { RutterClient } from './client'
 export { RutterError, RutterSchemaMismatchError } from './errors'
-export { RutterConnectionsApi } from './connections'
-export { RutterAccountingApi } from './accounting'
 export {
   RUTTER_SANDBOX_BASE_URL,
   RUTTER_PRODUCTION_BASE_URL,
