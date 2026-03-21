@@ -20,9 +20,14 @@ type TGetAccessTokenConnectionResponse = z.infer<
 export class RutterConnectionsApi {
   constructor(private readonly client: RutterClient) {}
 
-  async create(params: { platform: string }): Promise<TConnectionResponse> {
+  async create(
+    params: { platform?: string } = {},
+  ): Promise<TConnectionResponse> {
     const endpoint = '/connections/create'
-    const response = await this.client.post<unknown>(endpoint, params)
+    const response = await this.client.post<unknown>(
+      endpoint,
+      Object.keys(params).length > 0 ? params : undefined,
+    )
 
     const result = zConnectionResponse.safeParse(response)
     if (!result.success) {
