@@ -208,7 +208,7 @@ describe('connections.get', () => {
     )
 
     await expect(mockConnections.get('at_abc')).rejects.toThrow(
-      'Rutter response from /connections failed schema validation',
+      'Rutter response from /connections/access_token failed schema validation',
     )
   })
 })

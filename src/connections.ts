@@ -56,7 +56,7 @@ export class RutterConnectionsApi {
   }
 
   async get(accessToken: string): Promise<TGetAccessTokenConnectionResponse> {
-    const endpoint = '/connections'
+    const endpoint = '/connections/access_token'
     const response = await this.client.get<unknown>(endpoint, {
       access_token: accessToken,
     })
