@@ -8,8 +8,8 @@ import type {
 
 export class RutterClient {
   readonly baseUrl: string
-  private readonly clientId: string
-  private readonly clientSecret: string
+  readonly clientId: string
+  readonly clientSecret: string
 
   constructor(baseUrl: string, clientId: string, clientSecret: string) {
     this.baseUrl = baseUrl

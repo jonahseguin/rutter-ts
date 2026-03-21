@@ -85,7 +85,11 @@ export class RutterConnectionsApi {
     public_token: string
   }): Promise<TExchangeTokenResponse> {
     const endpoint = '/item/public_token/exchange'
-    const response = await this.client.post<unknown>(endpoint, params)
+    const response = await this.client.post<unknown>(endpoint, {
+      ...params,
+      client_id: this.client.clientId,
+      secret: this.client.clientSecret,
+    })
 
     const result = zExchangeTokenResponse.safeParse(response)
     if (!result.success) {
