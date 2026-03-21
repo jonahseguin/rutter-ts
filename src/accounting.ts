@@ -13,6 +13,7 @@ import {
 } from './generated/zod.gen'
 import type {
   CreateInvoice,
+  UpdateInvoice,
   CreateAccountingCustomer,
 } from './generated/types.gen'
 
@@ -137,6 +138,33 @@ export class RutterAccountingApi {
       `${endpoint}?access_token=${encodeURIComponent(accessToken)}`,
       body,
       options?.idempotencyKey ? { idempotencyKey: options.idempotencyKey } : undefined,
+    )
+
+    const result = zCreateInvoiceResponse.safeParse(response)
+    if (!result.success) {
+      throw new RutterSchemaMismatchError(
+        endpoint,
+        z.prettifyError(result.error),
+      )
+    }
+
+    return result.data
+  }
+
+  async updateInvoice(
+    accessToken: string,
+    id: string,
+    params: UpdateInvoice,
+    options?: { responseMode?: 'async' | 'prefer_sync' },
+  ): Promise<TCreateInvoiceResponse> {
+    const endpoint = `/accounting/invoices/${id}`
+    const body: Record<string, unknown> = { invoice: params }
+    if (options?.responseMode) {
+      body.response_mode = options.responseMode
+    }
+    const response = await this.client.patch<unknown>(
+      `${endpoint}?access_token=${encodeURIComponent(accessToken)}`,
+      body,
     )
 
     const result = zCreateInvoiceResponse.safeParse(response)
