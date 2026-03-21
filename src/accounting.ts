@@ -126,13 +126,17 @@ export class RutterAccountingApi {
   async createInvoice(
     accessToken: string,
     params: CreateInvoice,
-    idempotencyKey?: string,
+    options?: { idempotencyKey?: string; responseMode?: 'async' | 'prefer_sync' },
   ): Promise<TCreateInvoiceResponse> {
     const endpoint = '/accounting/invoices'
+    const body: Record<string, unknown> = { invoice: params }
+    if (options?.responseMode) {
+      body.response_mode = options.responseMode
+    }
     const response = await this.client.post<unknown>(
       `${endpoint}?access_token=${encodeURIComponent(accessToken)}`,
-      params,
-      idempotencyKey ? { idempotencyKey } : undefined,
+      body,
+      options?.idempotencyKey ? { idempotencyKey: options.idempotencyKey } : undefined,
     )
 
     const result = zCreateInvoiceResponse.safeParse(response)
@@ -149,11 +153,16 @@ export class RutterAccountingApi {
   async createCustomer(
     accessToken: string,
     params: CreateAccountingCustomer,
+    options?: { responseMode?: 'async' | 'prefer_sync' },
   ): Promise<TCreateCustomerResponse> {
     const endpoint = '/accounting/customers'
+    const body: Record<string, unknown> = { customer: params }
+    if (options?.responseMode) {
+      body.response_mode = options.responseMode
+    }
     const response = await this.client.post<unknown>(
       `${endpoint}?access_token=${encodeURIComponent(accessToken)}`,
-      { customer: params },
+      body,
     )
 
     const result = zCreateAccountingCustomerResponse.safeParse(response)

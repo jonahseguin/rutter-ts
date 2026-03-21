@@ -373,6 +373,29 @@ describe('accounting.createInvoice', () => {
     expect(calledUrl).toContain('access_token=at_create_token')
   })
 
+  test('wraps params in { invoice: ... } in request body', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ invoice: mockInvoice }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    await accounting.createInvoice('at_abc', {
+      customer_id: 'cust_1',
+      issue_date: '2024-07-01',
+      currency_code: 'USD',
+      line_items: [{ total_amount: 100, description: 'Test' }],
+    })
+
+    const [, opts] = mockFetch.mock.calls[0] as [string, RequestInit]
+    const body = JSON.parse(opts.body as string) as Record<string, unknown>
+    expect(body).toHaveProperty('invoice')
+    expect(body.invoice).toMatchObject({
+      customer_id: 'cust_1',
+      line_items: [{ total_amount: 100, description: 'Test' }],
+    })
+  })
+
   test('sends Idempotency-Key header when provided', async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -388,7 +411,7 @@ describe('accounting.createInvoice', () => {
         currency_code: 'USD',
         line_items: [],
       },
-      'idem_inv_123',
+      { idempotencyKey: 'idem_inv_123' },
     )
 
     const [, opts] = mockFetch.mock.calls[0] as [string, RequestInit]
