@@ -198,6 +198,43 @@ describe('connections.get', () => {
     expect(calledUrl).toContain('access_token=at_my_token')
   })
 
+  test('handles null initial_orders_synced_count and disabled_reason from API', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            connection: {
+              id: 'conn_456',
+              store_unique_id: 'store_xyz',
+              disabled: false,
+              disabled_reason: null,
+              link_url: 'https://link.rutterapi.com/456',
+              needs_update: false,
+              platform: 'QUICKBOOKS',
+              store_domain: '',
+              store_name: '',
+              unavailable_objects: null,
+              initial_orders_synced_count: null,
+              created_at: '2024-01-01T00:00:00Z',
+              last_sync_completed_at: '2024-01-02T00:00:00Z',
+              last_sync_started_at: '2024-01-02T00:00:00Z',
+              oldest_order_date: null,
+              newest_order_date: null,
+              estimated_completed_at: null,
+            },
+          }),
+      }),
+    )
+
+    const result = await mockConnections.get('at_456')
+
+    expect(result.connection.id).toBe('conn_456')
+    expect(result.connection.initial_orders_synced_count).toBeNull()
+    expect(result.connection.disabled_reason).toBeNull()
+  })
+
   test('throws on response schema mismatch', async () => {
     vi.stubGlobal(
       'fetch',

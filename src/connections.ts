@@ -6,8 +6,17 @@ import {
   zListConnectionsResponse,
   zExchangeTokenResponse,
   zDeleteConnectionResponse,
-  zGetAccessTokenConnectionResponse,
+  zGetAccessTokenConnectionResponse as zGetAccessTokenConnectionResponseGenerated,
 } from './generated/zod.gen'
+
+const zGetAccessTokenConnectionResponse =
+  zGetAccessTokenConnectionResponseGenerated.extend({
+    connection:
+      zGetAccessTokenConnectionResponseGenerated.shape.connection.extend({
+        initial_orders_synced_count: z.number().nullish(),
+        disabled_reason: z.string().nullish(),
+      }),
+  })
 
 type TConnectionResponse = z.infer<typeof zConnectionResponse>
 type TListConnectionsResponse = z.infer<typeof zListConnectionsResponse>
