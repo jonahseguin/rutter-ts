@@ -82,7 +82,7 @@ describe('connections.create', () => {
     await expect(
       mockConnections.create({ platform: 'QUICKBOOKS' }),
     ).rejects.toThrow(
-      'Rutter response from /connections failed schema validation',
+      'Rutter response from /connections/create failed schema validation',
     )
   })
 })

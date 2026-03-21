@@ -21,7 +21,7 @@ export class RutterConnectionsApi {
   constructor(private readonly client: RutterClient) {}
 
   async create(params: { platform: string }): Promise<TConnectionResponse> {
-    const endpoint = '/connections'
+    const endpoint = '/connections/create'
     const response = await this.client.post<unknown>(endpoint, params)
 
     const result = zConnectionResponse.safeParse(response)
