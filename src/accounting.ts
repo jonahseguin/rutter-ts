@@ -10,6 +10,7 @@ import {
   zInvoiceResponseWithConnection,
   zCreateInvoiceResponse,
   zCreateAccountingCustomerResponse,
+  zListAccountingCustomerResponseWithConnection,
 } from './generated/zod.gen'
 import type {
   CreateInvoice,
@@ -26,6 +27,9 @@ type TListInvoicesResponse = z.infer<typeof zListInvoiceResponseWithConnection>
 type TInvoiceResponse = z.infer<typeof zInvoiceResponseWithConnection>
 type TCreateInvoiceResponse = z.infer<typeof zCreateInvoiceResponse>
 type TCreateCustomerResponse = z.infer<typeof zCreateAccountingCustomerResponse>
+type TListCustomersResponse = z.infer<
+  typeof zListAccountingCustomerResponseWithConnection
+>
 
 export class RutterAccountingApi {
   constructor(private readonly client: RutterClient) {}
@@ -168,6 +172,28 @@ export class RutterAccountingApi {
     )
 
     const result = zCreateInvoiceResponse.safeParse(response)
+    if (!result.success) {
+      throw new RutterSchemaMismatchError(
+        endpoint,
+        z.prettifyError(result.error),
+      )
+    }
+
+    return result.data
+  }
+
+  async listCustomers(
+    accessToken: string,
+    params?: RutterPaginationParams & RutterQueryParams,
+  ): Promise<TListCustomersResponse> {
+    const endpoint = '/accounting/customers'
+    const response = await this.client.get<unknown>(endpoint, {
+      access_token: accessToken,
+      ...params,
+    })
+
+    const result =
+      zListAccountingCustomerResponseWithConnection.safeParse(response)
     if (!result.success) {
       throw new RutterSchemaMismatchError(
         endpoint,

@@ -1,6 +1,6 @@
 {
   "name": "rutter-ts",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "TypeScript SDK for the Rutter API",
   "type": "module",
   "main": "./dist/index.cjs",
