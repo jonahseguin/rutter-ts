@@ -207,7 +207,7 @@ export class RutterAccountingApi {
   async createCustomer(
     accessToken: string,
     params: CreateAccountingCustomer,
-    options?: { responseMode?: 'async' | 'prefer_sync' },
+    options?: { idempotencyKey?: string; responseMode?: 'async' | 'prefer_sync' },
   ): Promise<TCreateCustomerResponse> {
     const endpoint = '/accounting/customers'
     const body: Record<string, unknown> = { customer: params }
@@ -217,6 +217,7 @@ export class RutterAccountingApi {
     const response = await this.client.post<unknown>(
       `${endpoint}?access_token=${encodeURIComponent(accessToken)}`,
       body,
+      options?.idempotencyKey ? { idempotencyKey: options.idempotencyKey } : undefined,
     )
 
     const result = zCreateAccountingCustomerResponse.safeParse(response)
