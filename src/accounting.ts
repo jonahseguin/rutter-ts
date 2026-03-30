@@ -8,9 +8,8 @@ import {
   zAccountResponseWithConnection,
   zListInvoiceResponseWithConnection,
   zInvoiceResponseWithConnection,
-  zCreateInvoiceResponse,
-  zCreateAccountingCustomerResponse,
   zListAccountingCustomerResponseWithConnection,
+  zAsyncResponsePayload,
 } from "./generated/zod.gen";
 import type {
   CreateInvoice,
@@ -25,13 +24,78 @@ type TListAccountsResponse = z.infer<typeof zListAccountResponseWithConnection>;
 type TAccountResponse = z.infer<typeof zAccountResponseWithConnection>;
 type TListInvoicesResponse = z.infer<typeof zListInvoiceResponseWithConnection>;
 type TInvoiceResponse = z.infer<typeof zInvoiceResponseWithConnection>;
-type TCreateInvoiceResponse = z.infer<typeof zCreateInvoiceResponse>;
-type TCreateCustomerResponse = z.infer<
-  typeof zCreateAccountingCustomerResponse
->;
+const zCustomerSyncResponse = z.object({
+  customer: z.object({ id: z.string() }).passthrough(),
+});
+
+type TCustomerWriteResponse =
+  | z.infer<typeof zCustomerSyncResponse>
+  | z.infer<typeof zAsyncSyncResponse>;
+
+function parseCustomerWriteResponse(
+  endpoint: string,
+  response: unknown,
+): TCustomerWriteResponse {
+  const raw = response as Record<string, unknown> | null;
+  if (raw && "customer" in raw && raw.customer != null) {
+    const result = zCustomerSyncResponse.safeParse(response);
+    if (!result.success) {
+      throw new RutterSchemaMismatchError(
+        endpoint,
+        z.prettifyError(result.error),
+      );
+    }
+    return result.data;
+  }
+
+  const result = zAsyncSyncResponse.safeParse(response);
+  if (!result.success) {
+    throw new RutterSchemaMismatchError(
+      endpoint,
+      z.prettifyError(result.error),
+    );
+  }
+  return result.data;
+}
 type TListCustomersResponse = z.infer<
   typeof zListAccountingCustomerResponseWithConnection
 >;
+
+const zInvoiceSyncResponse = z.object({
+  invoice: z.object({ id: z.string() }).passthrough(),
+});
+
+const zAsyncSyncResponse = zAsyncResponsePayload;
+
+type TInvoiceWriteResponse =
+  | z.infer<typeof zInvoiceSyncResponse>
+  | z.infer<typeof zAsyncSyncResponse>;
+
+function parseInvoiceWriteResponse(
+  endpoint: string,
+  response: unknown,
+): TInvoiceWriteResponse {
+  const raw = response as Record<string, unknown> | null;
+  if (raw && "invoice" in raw && raw.invoice != null) {
+    const result = zInvoiceSyncResponse.safeParse(response);
+    if (!result.success) {
+      throw new RutterSchemaMismatchError(
+        endpoint,
+        z.prettifyError(result.error),
+      );
+    }
+    return result.data;
+  }
+
+  const result = zAsyncSyncResponse.safeParse(response);
+  if (!result.success) {
+    throw new RutterSchemaMismatchError(
+      endpoint,
+      z.prettifyError(result.error),
+    );
+  }
+  return result.data;
+}
 
 export class RutterAccountingApi {
   constructor(private readonly client: RutterClient) {}
@@ -137,7 +201,7 @@ export class RutterAccountingApi {
       idempotencyKey?: string;
       responseMode?: "async" | "prefer_sync";
     }
-  ): Promise<TCreateInvoiceResponse> {
+  ): Promise<TInvoiceWriteResponse> {
     const endpoint = "/accounting/invoices";
     const body: Record<string, unknown> = { invoice: params };
     if (options?.responseMode) {
@@ -151,15 +215,7 @@ export class RutterAccountingApi {
         : undefined
     );
 
-    const result = zCreateInvoiceResponse.safeParse(response);
-    if (!result.success) {
-      throw new RutterSchemaMismatchError(
-        endpoint,
-        z.prettifyError(result.error)
-      );
-    }
-
-    return result.data;
+    return parseInvoiceWriteResponse(endpoint, response);
   }
 
   async updateInvoice(
@@ -167,7 +223,7 @@ export class RutterAccountingApi {
     id: string,
     params: UpdateInvoice,
     options?: { responseMode?: "async" | "prefer_sync" }
-  ): Promise<TCreateInvoiceResponse> {
+  ): Promise<TInvoiceWriteResponse> {
     const endpoint = `/accounting/invoices/${id}`;
     const body: Record<string, unknown> = { invoice: params };
     if (options?.responseMode) {
@@ -178,15 +234,7 @@ export class RutterAccountingApi {
       body
     );
 
-    const result = zCreateInvoiceResponse.safeParse(response);
-    if (!result.success) {
-      throw new RutterSchemaMismatchError(
-        endpoint,
-        z.prettifyError(result.error)
-      );
-    }
-
-    return result.data;
+    return parseInvoiceWriteResponse(endpoint, response);
   }
 
   async listCustomers(
@@ -218,7 +266,7 @@ export class RutterAccountingApi {
       idempotencyKey?: string;
       responseMode?: "async" | "prefer_sync";
     }
-  ): Promise<TCreateCustomerResponse> {
+  ): Promise<TCustomerWriteResponse> {
     const endpoint = "/accounting/customers";
     const body: Record<string, unknown> = { customer: params };
     if (options?.responseMode) {
@@ -232,14 +280,6 @@ export class RutterAccountingApi {
         : undefined
     );
 
-    const result = zCreateAccountingCustomerResponse.safeParse(response);
-    if (!result.success) {
-      throw new RutterSchemaMismatchError(
-        endpoint,
-        z.prettifyError(result.error)
-      );
-    }
-
-    return result.data;
+    return parseCustomerWriteResponse(endpoint, response);
   }
 }
